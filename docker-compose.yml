@@ -1,18 +1,36 @@
-version: '2'
+version: '3'
 
 services:
-    service_myadmin_db:
-        container_name: service_myadmin_db
+    service_mysql:
+        restart: always
+        container_name: service_mysql
         image: mysql:5.7
+        ports:
+            - 3306:3306
         volumes:
-            - ../env/d-mysql:/var/lib/mysql
-        env_file:
-            - ./.env
+            - ./d-mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=formation
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=root
+        networks:
+            - net_myadmin
 
-    service_myadmin_phpmyadmin:
-        container_name: service_myadmin_phpmyadmin
+    service_phpmyadmin:
+        container_name: service_phpmyadmin
         image: phpmyadmin/phpmyadmin
         ports:
-            - ${PHPMYADMIN_PORT}:80
+            - 81:80
         links:
-            - service_myadmin_db:db
+            - service_mysql:db
+        networks:
+            - net_myadmin
+        environment:
+            MYSQL_USERNAME: root
+            MYSQL_ROOT_PASSWORD: root
+
+
+networks:
+    net_myadmin:
+        driver: bridge
